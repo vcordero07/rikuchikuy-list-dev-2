@@ -1,10 +1,15 @@
 "use strict";
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
+const session = require("express-session");
 const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
 const morgan = require("morgan");
 const passport = require("passport");
+const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const flash = require("express-flash");
 
 const { router: usersRouter } = require("./users/user.index");
 const { router: listsRouter } = require("./lists/list.index");
@@ -18,12 +23,20 @@ const { router: urlRouter } = require("./url/url.index");
 
 mongoose.Promise = global.Promise;
 
-const { PORT, DATABASE_URL } = require("./config");
+const {
+  PORT,
+  DATABASE_URL,
+  SENDGRID_USER,
+  SENDGRID_PWD,
+  MAIL_FROM,
+  JWT_SECRET
+} = require("./config");
 
 const app = express();
 
 app.use(morgan("common"));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
